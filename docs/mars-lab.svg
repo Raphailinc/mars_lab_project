@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#0b1f3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="520" fill="url(#bg)"/>
+  <text x="40" y="60" fill="#f97316" font-size="34" font-family="Inter, Arial, sans-serif" font-weight="700">Mars Lab Project</text>
+  <text x="40" y="90" fill="#cbd5e1" font-size="16" font-family="Inter, Arial, sans-serif">React SPA + Express API + MongoDB • отчёты и загрузка файлов</text>
+
+  <rect x="40" y="130" width="340" height="340" rx="18" fill="#111827" stroke="#f97316" stroke-width="2"/>
+  <text x="60" y="170" fill="#e5e7eb" font-size="16" font-family="Inter, Arial, sans-serif">Report form</text>
+  <rect x="60" y="190" width="300" height="48" rx="10" fill="#1f2937" stroke="#334155"/>
+  <text x="72" y="220" fill="#9ca3af" font-size="13" font-family="Inter, Arial, sans-serif">Scientist name</text>
+  <rect x="60" y="246" width="300" height="120" rx="10" fill="#1f2937" stroke="#334155"/>
+  <text x="72" y="276" fill="#9ca3af" font-size="13" font-family="Inter, Arial, sans-serif">Report content...</text>
+  <rect x="60" y="376" width="300" height="42" rx="10" fill="#0ea5e9"/>
+  <text x="150" y="405" fill="#0b1120" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="700">Upload file</text>
+  <rect x="60" y="426" width="300" height="42" rx="10" fill="#f97316"/>
+  <text x="155" y="455" fill="#0b1120" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="700">Send report</text>
+
+  <rect x="420" y="130" width="500" height="340" rx="18" fill="#0b1220" stroke="#0ea5e9" stroke-width="2"/>
+  <text x="440" y="170" fill="#e5e7eb" font-size="16" font-family="Inter, Arial, sans-serif">Reports feed</text>
+
+  <rect x="440" y="190" width="460" height="80" rx="12" fill="#111827" stroke="#1f2937"/>
+  <circle cx="470" cy="230" r="18" fill="#f97316"/>
+  <text x="500" y="215" fill="#e5e7eb" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="700">Alice</text>
+  <text x="500" y="236" fill="#9ca3af" font-size="12" font-family="Inter, Arial, sans-serif">“Sample rock data uploaded”</text>
+  <text x="500" y="255" fill="#22d3ee" font-size="12" font-family="Inter, Arial, sans-serif">file: core-sample.csv</text>
+
+  <rect x="440" y="284" width="460" height="80" rx="12" fill="#111827" stroke="#1f2937"/>
+  <circle cx="470" cy="324" r="18" fill="#22d3ee"/>
+  <text x="500" y="309" fill="#e5e7eb" font-size="14" font-family="Inter, Arial, sans-serif" font-weight="700">Bob</text>
+  <text x="500" y="330" fill="#9ca3af" font-size="12" font-family="Inter, Arial, sans-serif">“Window open, transmitting...”</text>
+
+  <text x="440" y="460" fill="#94a3b8" font-size="12" font-family="Inter, Arial, sans-serif">API: /api/upload-file, /api/reports • health: /api/check-connection</text>
+</svg>

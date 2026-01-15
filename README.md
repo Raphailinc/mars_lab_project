@@ -1,27 +1,36 @@
 ## Mars Lab Project
 
+![UI](docs/mars-lab.svg)
+
 Мини-приложение для отправки и просмотра отчётов (Express + MongoDB + React).
 
-### Запуск
+### Quickstart
 ```bash
-npm install
-cp .env.example .env    # при необходимости укажите MONGODB_URI/PORT/UPLOAD_DIR
-npm run build           # собирает фронтенд в frontend/public/bundle.js
-npm start               # nodemon backend/src/app.js
+npm install && npm run build && npm start
+# API: http://localhost:3000/api
 ```
-По умолчанию API: `http://localhost:3000/api`, загрузки отдаются по `/uploads`.
+`.env` (пример):
+```
+MONGODB_URI=mongodb://localhost:27017/mars_lab
+PORT=3000
+UPLOAD_DIR=uploads
+```
 
-### API
-- `GET /api/check-connection` — проверка доступности по окнам из `periods.json`.
-- `POST /api/upload-file` (FormData: file) — загрузка файла, ответ `{fileName}`.
-- `POST /api/reports` — создание отчёта `{scientistName, reportContent, fileName?}`.
-- `GET /api/reports` — список отчётов.
+### API (сжатая схема)
+```bash
+GET  /api/check-connection       # {"available": true}
+POST /api/upload-file (FormData: file) -> {"fileName":"sample.bin"}
+POST /api/reports {scientistName, reportContent, fileName?}
+GET  /api/reports                # [{"scientistName":"...","fileName":"..."}]
+```
 
-### Фронтенд
-Файлы в `frontend/public`: `index.html`, `bundle.js` (webpack), `styles.css`.
-Исходники React — в `frontend/src`. Главная — отправка отчёта, /reports — список.
+### Архитектура
+- `backend/src/app.js` — Express API, валидация входящих данных, загрузки через Multer.
+- `frontend/src/` — React SPA (отправка отчёта, список /reports), сборка webpack в `frontend/public/bundle.js`.
+- `uploads/` — сохраняются автоматически, раздаются статикой `/uploads`.
+- `periods.json` — окна связи (health-check /api/check-connection).
 
-### Примечания
-- Папка `uploads/` создаётся автоматически при старте.
-- `periods.json` задаёт доступные окна связи; если файла нет, связь считается доступной.
-- Стили и навигация упростили: минимальный JS в `main.js` только для меню/формы.
+### Quality
+- Форматирование: eslint пока не подключён; стили/React собраны минималистично.
+- Тесты: отсутствуют (ручные e2e), можно добавить jest/rtl; health-check покрывается вручную.
+- Быстрый smoke: `npm run build` + `npm start`.
