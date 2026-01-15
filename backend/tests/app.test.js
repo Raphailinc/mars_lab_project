@@ -1,6 +1,8 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const fs = require('fs');
+const path = require('path');
 
 let app;
 let mongo;
@@ -38,5 +40,28 @@ describe('API', () => {
     expect(list.statusCode).toBe(200);
     expect(Array.isArray(list.body)).toBe(true);
     expect(list.body[0].reportContent).toBe('Soil sample');
+  });
+
+  test('uploads file and returns fileName', async () => {
+    const filePath = path.join(__dirname, 'fixtures', 'dummy.txt');
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, 'hello');
+
+    const res = await request(app).post('/api/upload-file').attach('file', filePath);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.fileName).toBeDefined();
+  });
+
+  test('respects communication windows from periods.json', async () => {
+    const periodsPath = path.join(__dirname, '../../periods.json');
+    const now = new Date();
+    const past = new Date(now.getTime() - 60_000).toISOString();
+    const future = new Date(now.getTime() + 60_000).toISOString();
+    fs.writeFileSync(periodsPath, JSON.stringify([{ from: past, to: future }]));
+
+    const res = await request(app).get('/api/check-connection');
+    expect(res.statusCode).toBe(200);
+
+    fs.unlinkSync(periodsPath);
   });
 });
