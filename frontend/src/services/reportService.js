@@ -1,53 +1,50 @@
 const BASE_URL = '/api';
 
-export const sendReport = async (report) => {
-    try {
-        const isConnectionAvailable = await checkConnectionAvailability();
-        if (!isConnectionAvailable) {
-            throw new Error('Connection unavailable. Please try again later.');
-        }
+async function ensureConnection() {
+  const response = await fetch(`${BASE_URL}/check-connection`);
+  if (!response.ok) {
+    throw new Error('Связь с базой недоступна. Попробуйте позже.');
+  }
+}
 
-        const response = await fetch(`${BASE_URL}/reports`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(report),
-        });
+export const uploadFile = async (file) => {
+  await ensureConnection();
+  const formData = new FormData();
+  formData.append('file', file);
 
-        if (!response.ok) {
-            throw new Error('Failed to send report');
-        }
-        
-        return await response.json();
-    } catch (error) {
-        throw error;
-    }
+  const response = await fetch(`${BASE_URL}/upload-file`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Не удалось загрузить файл');
+  }
+  const data = await response.json();
+  return data.fileName;
 };
 
-const checkConnectionAvailability = async () => {
-    try {
-        const response = await fetch(`${BASE_URL}/check-connection`);
-        return response.ok;
-    } catch (error) {
-        return false;
-    }
+export const createReport = async (report) => {
+  await ensureConnection();
+  const response = await fetch(`${BASE_URL}/reports`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(report),
+  });
+
+  if (!response.ok) {
+    throw new Error('Не удалось отправить отчёт');
+  }
+  return response.json();
 };
 
 export const getReports = async () => {
-    try {
-        const isConnectionAvailable = await checkConnectionAvailability();
-        if (!isConnectionAvailable) {
-            throw new Error('Connection unavailable. Please try again later.');
-        }
-
-        const response = await fetch(`${BASE_URL}/reports`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch reports');
-        }
-        
-        return await response.json();
-    } catch (error) {
-        throw error;
-    }
+  await ensureConnection();
+  const response = await fetch(`${BASE_URL}/reports`);
+  if (!response.ok) {
+    throw new Error('Не удалось получить отчёты');
+  }
+  return response.json();
 };

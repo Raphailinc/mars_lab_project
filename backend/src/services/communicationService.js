@@ -1,19 +1,15 @@
 const { loadPeriods } = require('./periodService');
 
 const isCommunicationAvailable = () => {
-    const periods = loadPeriods();
-    const currentDateTime = new Date();
+  const periods = loadPeriods();
+  if (!periods.length) return true;
+  const currentDateTime = new Date();
 
-    for (const period of periods) {
-        const start = new Date(period.from);
-        const end = new Date(period.to);
-
-        if (currentDateTime >= start && currentDateTime <= end) {
-            return true;
-        }
-    }
-
-    return false;
+  return periods.some((period) => {
+    const start = new Date(period.from);
+    const end = new Date(period.to);
+    return currentDateTime >= start && currentDateTime <= end;
+  });
 };
 
 module.exports = { isCommunicationAvailable };

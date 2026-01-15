@@ -1,24 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { getReports, uploadFile, createReport } = require('../controllers/reportController');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+const { getReports, uploadFile, createReport } = require('../controllers/reportController');
 
-console.log('Storage destination:', path.resolve(__dirname, '..', '..', 'uploads'));
+const uploadDir = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', '..', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.resolve(__dirname, '..', '..', 'uploads'));
-  },
+  destination: uploadDir,
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    const safeName = `${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`;
+    cb(null, safeName);
   }
 });
 
 const upload = multer({ storage });
 
 router.get('/reports', getReports);
-router.post('/reports', upload.single('fileName'), createReport);
-router.get('/upload-file', upload.single('fileName'), uploadFile);
+router.post('/reports', createReport);
+router.post('/upload-file', upload.single('file'), uploadFile);
 
 module.exports = router;
