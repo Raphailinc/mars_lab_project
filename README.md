@@ -1,6 +1,6 @@
-## Mars Lab Project
-
 ![CI](https://github.com/Raphailinc/Mars-Lab-Project/actions/workflows/ci.yml/badge.svg)
+
+## Mars Lab Project
 
 ![UI](docs/mars-lab.svg)
 
