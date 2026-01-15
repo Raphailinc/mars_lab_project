@@ -6,3 +6,5 @@ uploads/
 .vscode/
 .parcel-cache
 dist/
+coverage/
+.eslintcache
