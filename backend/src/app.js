@@ -13,8 +13,10 @@ dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mars_lab_database';
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.resolve(__dirname, '..', '..', 'uploads');
+const MONGODB_URI =
+  process.env.MONGODB_URI || 'mongodb://localhost:27017/mars_lab_database';
+const UPLOAD_DIR =
+  process.env.UPLOAD_DIR || path.resolve(__dirname, '..', '..', 'uploads');
 
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -35,7 +37,10 @@ app.use(express.static(path.join(__dirname, '..', '..', 'frontend', 'public')));
 
 app.use((req, res, next) => {
   if (!isCommunicationAvailable()) {
-    return res.status(503).json({ message: 'Communication unavailable at the moment. Please try again later.' });
+    return res.status(503).json({
+      message:
+        'Communication unavailable at the moment. Please try again later.',
+    });
   }
   return next();
 });
@@ -43,13 +48,15 @@ app.use((req, res, next) => {
 app.use('/api', reportRoutes);
 app.use('/api', connectionRoutes);
 
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', '..', 'frontend', 'public', 'index.html'));
+  res.sendFile(
+    path.join(__dirname, '..', '..', 'frontend', 'public', 'index.html')
+  );
 });
 
 if (process.env.NODE_ENV !== 'test') {

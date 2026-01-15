@@ -16,6 +16,10 @@ module.exports = {
       version: 'detect',
     },
   },
+  rules: {
+    'react/prop-types': 'off',
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+  },
   overrides: [
     {
       files: ['backend/**/*.js'],
