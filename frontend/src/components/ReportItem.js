@@ -7,7 +7,14 @@ const ReportItem = ({ report }) => {
       <p>Текст отчёта: {report.reportContent}</p>
       {report.fileName && (
         <p>
-          Файл: <a href={`/uploads/${report.fileName}`} target="_blank" rel="noopener noreferrer">{report.fileName}</a>
+          Файл:{' '}
+          <a
+            href={`/uploads/${report.fileName}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {report.fileName}
+          </a>
         </p>
       )}
     </li>

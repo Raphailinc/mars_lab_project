@@ -23,16 +23,16 @@ const ReportsPage = () => {
 
   return (
     <div>
-        {error ? (
-            <p>{error}</p>
-        ) : (
-            <>
-                <h1>Список отчётов</h1>
-                <ReportList reports={reports} />
-            </>
-        )}
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <>
+          <h1>Список отчётов</h1>
+          <ReportList reports={reports} />
+        </>
+      )}
     </div>
-);
+  );
 };
 
 export default ReportsPage;

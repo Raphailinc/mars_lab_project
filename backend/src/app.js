@@ -1,41 +1,60 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const dotenv = require('dotenv');
-
-const reportRoutes = require('./routes/reportRoutes');
-const connectionRoutes = require('./services/connectionRoutes');
-const { isCommunicationAvailable } = require('./services/communicationService');
 
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const fs = require('fs/promises');
+
+const config = require('./config');
+const createReportRoutes = require('./routes/reportRoutes');
+const connectionRoutes = require('./services/connectionRoutes');
+const periodService = require('./services/periodService');
+const { isCommunicationAvailable } = require('./services/communicationService');
+
 const app = express();
-const PORT = process.env.PORT || 3000;
-const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://localhost:27017/mars_lab_database';
-const UPLOAD_DIR =
-  process.env.UPLOAD_DIR || path.resolve(__dirname, '..', '..', 'uploads');
-
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
-
-mongoose.connect(MONGODB_URI);
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
+const readiness = { mongo: false, periods: false };
 
 app.use(cors());
 app.use(express.json());
 
-app.use('/uploads', express.static(UPLOAD_DIR));
+app.get('/healthz', (_req, res) => res.status(200).json({ status: 'ok' }));
+app.get('/readyz', (_req, res) => {
+  const ready = readiness.mongo && periodService.isReady();
+  if (ready) {
+    return res.status(200).json({ status: 'ready' });
+  }
+  return res.status(503).json({
+    status: 'not_ready',
+    mongo: readiness.mongo,
+    periods: periodService.isReady(),
+  });
+});
+
+if (config.SERVE_UPLOADS_PUBLIC) {
+  const safeInline = new Set(config.INLINE_PUBLIC_EXTENSIONS);
+  const uploadsStatic = express.static(config.UPLOAD_DIR, {
+    fallthrough: true,
+  });
+  app.use('/uploads', (req, res, next) => {
+    const ext = path.extname(req.path).toLowerCase();
+    if (!safeInline.has(ext)) {
+      res.setHeader('Content-Disposition', 'attachment');
+    }
+    uploadsStatic(req, res, (err) => {
+      if (err && err.status === 404) {
+        return res.status(404).json({ message: 'File not found' });
+      }
+      return next(err);
+    });
+  });
+}
+
 app.use(express.static(path.join(__dirname, '..', '..', 'frontend', 'public')));
 
-app.use((req, res, next) => {
+const communicationGuard = (req, res, next) => {
   if (!isCommunicationAvailable()) {
     return res.status(503).json({
       message:
@@ -43,13 +62,14 @@ app.use((req, res, next) => {
     });
   }
   return next();
-});
+};
 
-app.use('/api', reportRoutes);
+app.use('/api', communicationGuard);
 app.use('/api', connectionRoutes);
+app.use('/api', createReportRoutes(config));
 
-app.use((err, req, res, _next) => {
-  console.error(err.stack);
+app.use((err, _req, res, _next) => {
+  console.error(err);
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
@@ -59,10 +79,59 @@ app.get('*', (req, res) => {
   );
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+const startServer = async ({
+  mongoConnect = mongoose.connect,
+  periodsOptions = {},
+} = {}) => {
+  try {
+    await fs.mkdir(config.UPLOAD_DIR, { recursive: true });
+    console.log(`Upload directory ready at ${config.UPLOAD_DIR}`);
+
+    readiness.periods = await periodService.init({
+      filePath: config.PERIODS_FILE,
+      watch: config.WATCH_PERIODS_FILE,
+      ...periodsOptions,
+    });
+    if (readiness.periods) {
+      console.log('Loaded communication periods cache');
+    } else {
+      console.warn(
+        'Communication periods cache not ready; proceeding with defaults'
+      );
+    }
+
+    await mongoConnect(config.MONGO_URI);
+    readiness.mongo = true;
+    console.log('Connected to MongoDB');
+
+    if (process.env.NODE_ENV !== 'test') {
+      app.listen(config.PORT, () => {
+        console.log(`Server is running on port ${config.PORT}`);
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error('Failed to start server', err);
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
+    throw err;
+  }
+};
+
+const shouldAutoStart = process.env.DEFER_APP_START !== 'true';
+const assignReadyPromise = (promise) => {
+  app.readyPromise = promise;
+  return promise;
+};
+
+if (shouldAutoStart) {
+  assignReadyPromise(startServer());
+} else {
+  assignReadyPromise(Promise.resolve());
 }
+
+app.startServer = (options) => assignReadyPromise(startServer(options));
+app.readiness = readiness;
 
 module.exports = app;

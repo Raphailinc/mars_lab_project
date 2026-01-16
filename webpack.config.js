@@ -33,8 +33,16 @@ module.exports = {
     ],
   },
   devServer: {
-    contentBase: './frontend/public',
+    static: {
+      directory: path.join(__dirname, 'frontend', 'public'),
+    },
     hot: true,
     historyApiFallback: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
   },
 };
