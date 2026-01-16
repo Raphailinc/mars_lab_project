@@ -1,4 +1,5 @@
 ![CI](https://github.com/Raphailinc/Mars-Lab-Project/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://raw.githubusercontent.com/Raphailinc/Mars-Lab-Project/main/badges/coverage.svg)
 
 ## Mars Lab Project
 
